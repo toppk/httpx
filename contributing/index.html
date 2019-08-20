@@ -38,7 +38,7 @@
     
     
       
-        <title>Advanced Usage - HTTPX</title>
+        <title>Contributing - HTTPX</title>
       
     
     
@@ -79,7 +79,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#advanced-usage" tabindex="1" class="md-skip">
+      <a href="#contributing" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -105,7 +105,7 @@
             </span>
             <span class="md-header-nav__topic">
               
-                Advanced Usage
+                Contributing
               
             </span>
           
@@ -238,63 +238,11 @@
       
       
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        Advanced Usage
-      </label>
-    
-    <a href="./" title="Advanced Usage" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../advanced/" title="Advanced Usage" class="md-nav__link">
       Advanced Usage
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#client-instances" title="Client Instances" class="md-nav__link">
-    Client Instances
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#calling-into-python-web-apps" title="Calling into Python Web Apps" class="md-nav__link">
-    Calling into Python Web Apps
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#netrc-support" title=".netrc Support" class="md-nav__link">
-    .netrc Support
-  </a>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
     
@@ -350,11 +298,70 @@
       
       
 
+  
 
-  <li class="md-nav__item">
-    <a href="../contributing/" title="Contributing" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Contributing
+      </label>
+    
+    <a href="./" title="Contributing" class="md-nav__link md-nav__link--active">
       Contributing
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#reporting-bugs-or-other-issues" title="Reporting Bugs or Other Issues" class="md-nav__link">
+    Reporting Bugs or Other Issues
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#development" title="Development" class="md-nav__link">
+    Development
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-and-linting" title="Testing and Linting" class="md-nav__link">
+    Testing and Linting
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documenting" title="Documenting" class="md-nav__link">
+    Documenting
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
     
@@ -379,22 +386,29 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#client-instances" title="Client Instances" class="md-nav__link">
-    Client Instances
+  <a href="#reporting-bugs-or-other-issues" title="Reporting Bugs or Other Issues" class="md-nav__link">
+    Reporting Bugs or Other Issues
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#calling-into-python-web-apps" title="Calling into Python Web Apps" class="md-nav__link">
-    Calling into Python Web Apps
+  <a href="#development" title="Development" class="md-nav__link">
+    Development
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#netrc-support" title=".netrc Support" class="md-nav__link">
-    .netrc Support
+  <a href="#testing-and-linting" title="Testing and Linting" class="md-nav__link">
+    Testing and Linting
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documenting" title="Documenting" class="md-nav__link">
+    Documenting
   </a>
   
 </li>
@@ -416,80 +430,104 @@
               
                 
                 
-                <h1 id="advanced-usage">Advanced Usage</h1>
-<h2 id="client-instances">Client Instances</h2>
-<p>Using a Client instance to make requests will give you HTTP connection pooling,
-will provide cookie persistence, and allows you to apply configuration across
-all outgoing requests.</p>
-<div class="codehilite"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">client</span> <span class="o">=</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">r</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;https://example.org/&#39;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">r</span>
-<span class="o">&lt;</span><span class="n">Response</span> <span class="p">[</span><span class="mi">200</span> <span class="n">OK</span><span class="p">]</span><span class="o">&gt;</span>
-</pre></div>
-
-
-<h2 id="calling-into-python-web-apps">Calling into Python Web Apps</h2>
-<p>You can configure an <code>httpx</code> client to call directly into a Python web
-application, using either the WSGI or ASGI protocol.</p>
-<p>This is particularly useful for two main use-cases:</p>
+                <h1 id="contributing">Contributing</h1>
+<p>Thank you for being interested in contributing with HTTPX.
+There are many ways you can contribute with the project:</p>
 <ul>
-<li>Using <code>httpx</code> as a client, inside test cases.</li>
-<li>Mocking out external services, during tests or in dev/staging environments.</li>
+<li>Try HTTPX and <a href="https://github.com/encode/httpx/issues/new">report bugs/issues you find</a></li>
+<li><a href="https://github.com/encode/httpx/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">Implement new features</a></li>
+<li><a href="https://github.com/encode/httpx/pulls">Review Pull Requests of others</a></li>
+<li>Write documentation</li>
+<li>Participate in discussions</li>
 </ul>
-<p>Here's an example of integrating against a Flask application:</p>
-<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
-<span class="kn">import</span> <span class="nn">httpx</span>
-
-
-<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-
-<span class="nd">@app.route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">hello</span><span class="p">():</span>
-    <span class="k">return</span> <span class="s2">&quot;Hello World!&quot;</span>
-
-<span class="n">client</span> <span class="o">=</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">app</span><span class="o">=</span><span class="n">app</span><span class="p">)</span>
-<span class="n">r</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;http://example/&#39;</span><span class="p">)</span>
-<span class="k">assert</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span>
-<span class="k">assert</span> <span class="n">r</span><span class="o">.</span><span class="n">text</span> <span class="o">==</span> <span class="s2">&quot;Hello World!&quot;</span>
-</pre></div>
-
-
-<p>For some more complex cases you might need to customize the WSGI or ASGI
-dispatch. This allows you to:</p>
+<h2 id="reporting-bugs-or-other-issues">Reporting Bugs or Other Issues</h2>
+<p>Found something that HTTPX should support?
+Stumbled upon some unexpected behavior?</p>
+<p>Feel free to open an issue at the
+<a href="https://github.com/encode/httpx/issues">issue tracker</a>.
+Try to be more descriptive as you can and in case of a bug report,
+provide as much information as possible like:</p>
 <ul>
-<li>Inspect 500 error responses, rather than raise exceptions, by setting <code>raise_app_exceptions=False</code>.</li>
-<li>Mount the WSGI or ASGI application at a subpath, by setting <code>script_name</code> (WSGI) or <code>root_path</code> (ASGI).</li>
-<li>Use a given the client address for requests, by setting <code>remote_addr</code> (WSGI) or <code>client</code> (ASGI).</li>
+<li>OS platform</li>
+<li>Python version</li>
+<li>Installed dependencies and versions (<code>python -m pip freeze</code>)</li>
+<li>Code snippet</li>
+<li>Error traceback</li>
 </ul>
-<p>For example:</p>
-<div class="codehilite"><pre><span></span><span class="c1"># Instantiate a client that makes WSGI requests with a client IP of &quot;1.2.3.4&quot;.</span>
-<span class="n">dispatch</span> <span class="o">=</span> <span class="n">httpx</span><span class="o">.</span><span class="n">WSGIDispatch</span><span class="p">(</span><span class="n">app</span><span class="o">=</span><span class="n">app</span><span class="p">,</span> <span class="n">remote_addr</span><span class="o">=</span><span class="s2">&quot;1.2.3.4&quot;</span><span class="p">)</span>
-<span class="n">client</span> <span class="o">=</span> <span class="n">httpx</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">dispatch</span><span class="o">=</span><span class="n">dispatch</span><span class="p">)</span>
+<h2 id="development">Development</h2>
+<p>To start developing HTTPX create a <strong>fork</strong> of the
+<a href="https://github.com/encode/httpx">HTTPX repository</a> on GitHub.</p>
+<p>Then clone your fork with the following command replacing <code>YOUR-USERNAME</code> with
+your GitHub username:</p>
+<div class="codehilite"><pre><span></span>$ git clone https://github.com/YOUR-USERNAME/httpx
 </pre></div>
 
 
-<h2 id="netrc-support">.netrc Support</h2>
-<p>HTTPX supports .netrc file. In <code>trust_env=True</code> cases, if auth parameter is
-not defined, HTTPX tries to add auth into request's header from .netrc file.</p>
-<p>As default <code>trust_env</code> is true. To set false:</p>
-<div class="codehilite"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">httpx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;https://example.org/&#39;</span><span class="p">,</span> <span class="n">trust_env</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<p>With the repository cloned you can access its folder, set up the
+virtual environment, install the project requirements,
+and then install HTTPX on edit mode:</p>
+<div class="codehilite"><pre><span></span>$ <span class="nb">cd</span> httpx
+$ python3 -m venv venv
+$ <span class="nb">source</span> venv/bin/activate
+$ pip install -r test-requirements.txt
+$ pip install -e .
 </pre></div>
 
 
-<p>If <code>NETRC</code> environment is empty, HTTPX tries to use default files.
-(<code>~/.netrc</code>, <code>~/_netrc</code>)</p>
-<p>To change <code>NETRC</code> environment:</p>
-<div class="codehilite"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">os</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;NETRC&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;my_default_folder/.my_netrc&quot;</span>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Feel free to replace this step with your development environment setup
+(pyenv, pipenv, virtualenvwrapper, docker, etc).</p>
+</div>
+<h2 id="testing-and-linting">Testing and Linting</h2>
+<p>We use <a href="https://nox.thea.codes/en/stable/">nox</a> to automate testing, linting,
+and documentation building workflow. Make sure you have it installed
+at your system before starting.</p>
+<p>Install nox with:</p>
+<div class="codehilite"><pre><span></span>$ python3 -m pip install --user nox
 </pre></div>
 
 
-<p>.netrc file content example:</p>
-<div class="codehilite"><pre><span></span><span class="n">machine</span> <span class="n">netrcexample</span><span class="p">.</span><span class="n">org</span>
-<span class="n">login</span> <span class="n">example</span><span class="o">-</span><span class="n">username</span>
-<span class="n">password</span> <span class="n">example</span><span class="o">-</span><span class="n">password</span>
+<p>Alternatively, use <a href="https://github.com/pipxproject/pipx">pipx</a> if you prefer
+to keep it into an isolated environment:</p>
+<div class="codehilite"><pre><span></span>$ pipx install nox
+</pre></div>
 
-<span class="p">...</span>
+
+<p>Now, with nox installed run the complete pipeline with:</p>
+<div class="codehilite"><pre><span></span>$ nox
+</pre></div>
+
+
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The test suite spawns a testing server at the port <strong>8000</strong>.
+Make sure this isn't being used, so the tests can run properly.</p>
+</div>
+<p>To run the code auto-formatting separately:</p>
+<div class="codehilite"><pre><span></span>$ nox -s lint
+</pre></div>
+
+
+<p>Also, if you need to run the tests only:</p>
+<div class="codehilite"><pre><span></span>$ nox -s <span class="nb">test</span>
+</pre></div>
+
+
+<p>You can also run a single test script like this:</p>
+<div class="codehilite"><pre><span></span>$ nox -s <span class="nb">test</span> -- tests/test_multipart.py
+</pre></div>
+
+
+<h2 id="documenting">Documenting</h2>
+<p>To work with the documentation, make sure you have <code>mkdocs</code> and
+<code>mkdocs-material</code> installed on your environment:</p>
+<div class="codehilite"><pre><span></span>$ pip install mkdocs mkdocs-material
+</pre></div>
+
+
+<p>To spawn the docs server run:</p>
+<div class="codehilite"><pre><span></span>$ mkdocs serve
 </pre></div>
                 
                   
@@ -511,7 +549,7 @@ not defined, HTTPX tries to add auth into request's header from .netrc file.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../quickstart/" title="QuickStart" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../api/" title="Developer Interface" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -520,25 +558,11 @@ not defined, HTTPX tries to add auth into request's header from .netrc file.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                QuickStart
+                Developer Interface
               </span>
             </div>
           </a>
         
-        
-          <a href="../parallel/" title="Parallel Requests" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
-                <span class="md-footer-nav__direction">
-                  Next
-                </span>
-                Parallel Requests
-              </span>
-            </div>
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
-            </div>
-          </a>
         
       </nav>
     </div>
