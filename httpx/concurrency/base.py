@@ -52,9 +52,6 @@ class BaseStream:
     ) -> bytes:
         raise NotImplementedError()  # pragma: no cover
 
-    def write_no_block(self, data: bytes) -> None:
-        raise NotImplementedError()  # pragma: no cover
-
     async def write(self, data: bytes, timeout: TimeoutConfig = None) -> None:
         raise NotImplementedError()  # pragma: no cover
 
@@ -151,6 +148,9 @@ class ConcurrencyBackend:
                 yield self.run(async_iterator.__anext__)
             except StopAsyncIteration:
                 break
+
+    async def sleep(self, seconds: float) -> None:
+        raise NotImplementedError()  # pragma: no cover
 
     def create_queue(self, max_size: int) -> BaseQueue:
         raise NotImplementedError()  # pragma: no cover

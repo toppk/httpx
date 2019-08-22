@@ -1,4 +1,3 @@
-import asyncio
 import ssl
 import typing
 
@@ -9,10 +8,11 @@ import h2.events
 from httpx import AsyncioBackend, BaseStream, Request, TimeoutConfig
 
 
-class MockHTTP2Backend(AsyncioBackend):
-    def __init__(self, app):
+class MockHTTP2Backend:
+    def __init__(self, app, backend=None):
         self.app = app
         self.server = None
+        self.backend = AsyncioBackend() if backend is None else backend
 
     async def connect(
         self,
@@ -21,15 +21,20 @@ class MockHTTP2Backend(AsyncioBackend):
         ssl_context: typing.Optional[ssl.SSLContext],
         timeout: TimeoutConfig,
     ) -> BaseStream:
-        self.server = MockHTTP2Server(self.app)
+        self.server = MockHTTP2Server(self.app, backend=self.backend)
         return self.server
+
+    def __getattr__(self, name):
+        # Defer all other methods to concurrency backend.
+        return getattr(self.backend, name)
 
 
 class MockHTTP2Server(BaseStream):
-    def __init__(self, app):
+    def __init__(self, app, backend):
         config = h2.config.H2Configuration(client_side=False)
         self.conn = h2.connection.H2Connection(config=config)
         self.app = app
+        self.backend = backend
         self.buffer = b""
         self.requests = {}
         self.close_connection = False
@@ -40,11 +45,12 @@ class MockHTTP2Server(BaseStream):
         return "HTTP/2"
 
     async def read(self, n, timeout, flag=None) -> bytes:
-        await asyncio.sleep(0)
+        await self.backend.sleep(0)
         send, self.buffer = self.buffer[:n], self.buffer[n:]
         return send
 
-    def write_no_block(self, data: bytes) -> None:
+    async def write(self, data: bytes, timeout) -> None:
+        await self.backend.sleep(0)
         events = self.conn.receive_data(data)
         self.buffer += self.conn.data_to_send()
         for event in events:
@@ -54,9 +60,6 @@ class MockHTTP2Server(BaseStream):
                 self.receive_data(event.data, event.stream_id)
             elif isinstance(event, h2.events.StreamEnded):
                 self.stream_complete(event.stream_id)
-
-    async def write(self, data: bytes, timeout) -> None:
-        self.write_no_block(data)
 
     async def close(self) -> None:
         pass

@@ -33,7 +33,7 @@ class HTTP2Connection:
 
         #  Start sending the request.
         if not self.initialized:
-            self.initiate_connection()
+            await self.initiate_connection(timeout)
 
         stream_id = await self.send_headers(request, timeout)
 
@@ -58,10 +58,10 @@ class HTTP2Connection:
     async def close(self) -> None:
         await self.stream.close()
 
-    def initiate_connection(self) -> None:
+    async def initiate_connection(self, timeout: TimeoutConfig = None) -> None:
         self.h2_state.initiate_connection()
         data_to_send = self.h2_state.data_to_send()
-        self.stream.write_no_block(data_to_send)
+        await self.stream.write(data_to_send, timeout=timeout)
         self.initialized = True
 
     async def send_headers(

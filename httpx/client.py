@@ -80,7 +80,7 @@ class BaseClient:
             if param_count == 2:
                 dispatch = WSGIDispatch(app=app)
             else:
-                dispatch = ASGIDispatch(app=app)
+                dispatch = ASGIDispatch(app=app, backend=backend)
 
         if dispatch is None:
             async_dispatch: AsyncDispatcher = ConnectionPool(
@@ -635,7 +635,7 @@ class Client(BaseClient):
         # arbitrary concurrency backends.
         # Therefore, we kept the `backend` parameter (for testing/mocking), but enforce
         # that the concurrency backend derives from the asyncio one.
-        if not isinstance(backend, AsyncioBackend):
+        if not isinstance(backend, AsyncioBackend) and not hasattr(backend, "loop"):
             raise ValueError(
                 "'Client' only supports asyncio-based concurrency backends"
             )

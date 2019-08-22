@@ -1,4 +1,6 @@
 import asyncio
+import functools
+import inspect
 
 import pytest
 import trustme
@@ -9,6 +11,53 @@ from cryptography.hazmat.primitives.serialization import (
 )
 from uvicorn.config import Config
 from uvicorn.main import Server
+
+from httpx.concurrency.asyncio import AsyncioBackend
+
+try:
+    from httpx.concurrency.trio import TrioBackend
+except ImportError:  # pragma: no cover
+    TrioBackend = None  # type: ignore
+
+
+@pytest.fixture(
+    params=[
+        pytest.param(AsyncioBackend, marks=pytest.mark.asyncio),
+        pytest.param(TrioBackend, marks=pytest.mark.asyncio),
+    ]
+)
+def backend(request):
+    backend_cls = request.param
+    if backend_cls is None:  # pragma: no cover
+        pytest.skip()
+    backend = backend_cls()
+    return backend
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_pyfunc_call(pyfuncitem):
+    """
+    Test functions that use a concurrency backend other than asyncio must be run
+    in a separate thread.
+    """
+    if "backend" not in pyfuncitem.fixturenames:
+        return
+
+    backend = pyfuncitem.funcargs["backend"]
+    assert backend is not None
+
+    if isinstance(backend, AsyncioBackend):
+        return
+
+    func = pyfuncitem.obj
+    assert inspect.iscoroutinefunction(func)
+
+    @functools.wraps(func)
+    async def wrapped(**kwargs):
+        asyncio_backend = AsyncioBackend()
+        await asyncio_backend.run_in_threadpool(backend.run, func, **kwargs)
+
+    pyfuncitem.obj = wrapped
 
 
 async def app(scope, receive, send):
@@ -130,6 +179,24 @@ async def server():
     finally:
         server.should_exit = True
         await task
+
+
+@pytest.fixture
+def restart(backend):
+    async def asyncio_restart(server):
+        await server.shutdown()
+        await server.startup()
+
+    if isinstance(backend, AsyncioBackend):
+        return asyncio_restart
+
+    # Uvicorn runs on asyncio, so if we're not running on asyncio during a test
+    # we must spawn a new loop and do shutdown/startup there.
+    async def restart(server):
+        asyncio_backend = AsyncioBackend()
+        asyncio_backend.run(asyncio_restart, server)
+
+    return restart
 
 
 @pytest.fixture

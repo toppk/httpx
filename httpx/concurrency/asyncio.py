@@ -93,9 +93,6 @@ class Stream(BaseStream):
 
         return data
 
-    def write_no_block(self, data: bytes) -> None:
-        self.stream_writer.write(data)  # pragma: nocover
-
     async def write(
         self, data: bytes, timeout: TimeoutConfig = None, flag: TimeoutFlag = None
     ) -> None:
@@ -215,6 +212,9 @@ class AsyncioBackend(ConcurrencyBackend):
 
     def get_semaphore(self, limits: PoolLimits) -> BasePoolSemaphore:
         return PoolSemaphore(limits)
+
+    async def sleep(self, seconds: float) -> None:
+        await asyncio.sleep(seconds)
 
     def create_queue(self, max_size: int) -> BaseQueue:
         return typing.cast(BaseQueue, asyncio.Queue(maxsize=max_size))
