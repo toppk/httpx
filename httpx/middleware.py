@@ -1,41 +1,78 @@
+import functools
 import typing
+from base64 import b64encode
 
-from ..config import DEFAULT_MAX_REDIRECTS, CertTypes, TimeoutTypes, VerifyTypes
-from ..exceptions import RedirectBodyUnavailable, RedirectLoop, TooManyRedirects
-from ..models import URL, AsyncRequest, AsyncResponse, Cookies, Headers
-from ..status_codes import codes
-from .base import AsyncDispatcher
+from .config import DEFAULT_MAX_REDIRECTS
+from .exceptions import RedirectBodyUnavailable, RedirectLoop, TooManyRedirects
+from .models import URL, AsyncRequest, AsyncResponse, Cookies, Headers
+from .status_codes import codes
+
+Responder = typing.Callable[[AsyncRequest], typing.Coroutine[None, None, AsyncResponse]]
+Middleware = typing.Callable[
+    [AsyncRequest, typing.Callable], typing.Coroutine[None, None, AsyncResponse]
+]
 
 
-class RedirectDispatcher(AsyncDispatcher):
+def basic_auth(
+    username: typing.Union[str, bytes], password: typing.Union[str, bytes]
+) -> Middleware:
+    if isinstance(username, str):
+        username = username.encode("latin1")
+
+    if isinstance(password, str):
+        password = password.encode("latin1")
+
+    userpass = b":".join((username, password))
+    token = b64encode(userpass).decode().strip()
+    print(username, password, userpass, token)
+    authorization_header = f"Basic {token}"
+
+    async def dispatch(request: AsyncRequest, get_response: Responder) -> AsyncResponse:
+        request.headers["Authorization"] = authorization_header
+        return await get_response(request)
+
+    return dispatch
+
+
+def custom_auth(auth: typing.Callable[[AsyncRequest], AsyncRequest]) -> Middleware:
+    async def dispatch(request: AsyncRequest, get_response: Responder) -> AsyncResponse:
+        request = auth(request)
+        return await get_response(request)
+
+    return dispatch
+
+
+def redirect(
+    allow_redirects: bool = True,
+    max_redirects: int = DEFAULT_MAX_REDIRECTS,
+    cookies: typing.Optional[Cookies] = None,
+) -> Middleware:
+    return Redirect(
+        allow_redirects=allow_redirects, max_redirects=max_redirects, cookies=cookies
+    ).dispatch
+
+
+class Redirect:
     def __init__(
         self,
-        next_dispatcher: AsyncDispatcher,
         allow_redirects: bool = True,
         max_redirects: int = DEFAULT_MAX_REDIRECTS,
-        base_cookies: typing.Optional[Cookies] = None,
+        cookies: typing.Optional[Cookies] = None,
     ):
-        self.next_dispatcher = next_dispatcher
         self.allow_redirects = allow_redirects
         self.max_redirects = max_redirects
-        self.base_cookies = base_cookies
-        self.history = []  # type: list
+        self.cookies = cookies
+        self.history: typing.List[AsyncResponse] = []
 
-    async def send(
-        self,
-        request: AsyncRequest,
-        verify: VerifyTypes = None,
-        cert: CertTypes = None,
-        timeout: TimeoutTypes = None,
+    async def dispatch(
+        self, request: AsyncRequest, get_response: Responder
     ) -> AsyncResponse:
         if len(self.history) > self.max_redirects:
             raise TooManyRedirects()
         if request.url in (response.url for response in self.history):
             raise RedirectLoop()
 
-        response = await self.next_dispatcher.send(
-            request, verify=verify, cert=cert, timeout=timeout
-        )
+        response = await get_response(request)
         response.history = list(self.history)
 
         if not response.is_redirect:
@@ -43,19 +80,12 @@ class RedirectDispatcher(AsyncDispatcher):
 
         self.history.append(response)
         next_request = self.build_redirect_request(request, response)
+
         if self.allow_redirects:
-            return await self.send(
-                next_request, verify=verify, cert=cert, timeout=timeout
-            )
-        else:
+            return await self.dispatch(next_request, get_response)
 
-            async def send_next() -> AsyncResponse:
-                return await self.send(
-                    next_request, verify=verify, cert=cert, timeout=timeout
-                )
-
-            response.next = send_next  # type: ignore
-            return response
+        response.next = functools.partial(self.dispatch, next_request, get_response)
+        return response
 
     def build_redirect_request(
         self, request: AsyncRequest, response: AsyncResponse
@@ -64,7 +94,7 @@ class RedirectDispatcher(AsyncDispatcher):
         url = self.redirect_url(request, response)
         headers = self.redirect_headers(request, url)  # TODO: merge headers?
         content = self.redirect_content(request, method)
-        cookies = Cookies(self.base_cookies)
+        cookies = Cookies(self.cookies)
         cookies.update(request.cookies)
         return AsyncRequest(
             method=method, url=url, headers=headers, data=content, cookies=cookies
